@@ -2,15 +2,14 @@ import { Text, View, TextInput, Pressable, StyleSheet, FlatList } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useContext, useEffect } from "react";
 import { data } from '@/data/todos';
+import { useRouter } from "expo-router";
 import {Inter_500Medium, useFonts} from '@expo-google-fonts/inter';
 import Animated, { LinearTransition } from 'react-native-reanimated'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeContext } from "@/context/ThemeContext";
-
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Octicons from '@expo/vector-icons/Octicons';
-
 
 export default function Index() {
 	const [todos, setTodos] = useState([])
@@ -22,6 +21,8 @@ export default function Index() {
 	const [loaded, error] = useFonts({
 		Inter_500Medium,
 	})
+
+	const router = useRouter()
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -79,14 +80,23 @@ export default function Index() {
 		setTodos(todos.filter(todo => todo.id !== id))
 	}
 
+	const handlePress = (id: number) => {
+		router.push(`/todos/${id}`)
+	}
+
 	const renderItem = ({item}) => (
 		<View style={styles.todoItem}>
-			<Text
-				style={[styles.todoText, item.completed && styles.completedText]}
+			<Pressable
+				onLongPress={() => handlePress(item.id)}
 				onPress={() => toggleTodo(item.id)}
 			>
-				{item.title}
-			</Text>
+				<Text
+					style={[styles.todoText, item.completed && styles.completedText]}
+					
+				>
+					{item.title}
+				</Text>
+			</Pressable>
 			<Pressable onPress={() => removeTodo(item.id)}>
 				<MaterialCommunityIcons name="delete-circle" size={36} color="red" selectable={undefined} />
 			</Pressable>
@@ -102,6 +112,7 @@ export default function Index() {
 			<View style={styles.inputContainer}>
 				<TextInput 
 					style={styles.input}
+					maxLength={30}
 					placeholder="Enter Todo"
 					placeholderTextColor='gray'
 					value={text}
